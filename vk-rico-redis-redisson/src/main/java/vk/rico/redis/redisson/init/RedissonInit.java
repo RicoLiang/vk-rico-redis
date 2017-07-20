@@ -20,7 +20,7 @@ public class RedissonInit {
 	public RedissonClient buildRedissonClient() {
 		Config config = new Config();
 		SingleServerConfig singleServer = config.useSingleServer();
-		singleServer.setAddress("redis://192.168.1.20:6379");
+		singleServer.setAddress("redis://172.16.6.185:6379");
 		singleServer.setDatabase(0);
 		RedissonClient redissonClient = Redisson.create(config);
 		return redissonClient;

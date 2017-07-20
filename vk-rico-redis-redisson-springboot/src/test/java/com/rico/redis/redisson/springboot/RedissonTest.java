@@ -1,4 +1,4 @@
-package com.rico.redis.redisson;
+package com.rico.redis.redisson.springboot;
 
 import java.util.Map.Entry;
 import java.util.Set;
