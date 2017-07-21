@@ -22,6 +22,8 @@ import org.redisson.api.RMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import vk.rico.redis.redisson.util.JsonUtils;
+
 public class RMapTest extends BaseTest {
 
 	@Test
@@ -104,9 +106,10 @@ public class RMapTest extends BaseTest {
 
 	/**
 	 * key设计
+	 * @throws Exception 
 	 */
 	@Test
-	public void testRMapput1() {
+	public void testRMapput1() throws Exception {
 		OrderPO po1 = new OrderPO();
 		po1.setOrderNo("CO201707101842001");
 		po1.setPlatform("ALI");
@@ -132,9 +135,12 @@ public class RMapTest extends BaseTest {
 		po3.setOrderAmount(13.51F);
 
 		HashMap<String, Object> values = Maps.newHashMapWithExpectedSize(64);
-		values.putAll(po1.getEntry());
-		values.putAll(po2.getEntry());
-		values.putAll(po3.getEntry());
+//		values.putAll(po1.getEntry());
+//		values.putAll(po2.getEntry());
+//		values.putAll(po3.getEntry());
+		values.putAll(JsonUtils.convertValue(po1, Map.class));
+		values.putAll(JsonUtils.convertValue(po2, Map.class));
+		values.putAll(JsonUtils.convertValue(po3, Map.class));
 
 		RMap<String, Object> orders = redissonClient.getMap("orders");
 		orders.putAll(values);
@@ -142,9 +148,10 @@ public class RMapTest extends BaseTest {
 
 	/**
 	 * key设计
+	 * @throws Exception 
 	 */
 	@Test
-	public void testRMapput11() {
+	public void testRMapput11() throws Exception {
 		OrderPO po1 = new OrderPO();
 		po1.setOrderNo("CO201707101842001");
 		po1.setPlatform("ALI");
@@ -170,9 +177,12 @@ public class RMapTest extends BaseTest {
 		po3.setOrderAmount(13.51F);
 
 		HashMap<String, Object> values = Maps.newHashMapWithExpectedSize(64);
-		values.putAll(po1.getEntry2());
-		values.putAll(po2.getEntry2());
-		values.putAll(po3.getEntry2());
+//		values.putAll(po1.getEntry2());
+//		values.putAll(po2.getEntry2());
+//		values.putAll(po3.getEntry2());
+		values.putAll(JsonUtils.convertValue(po1, Map.class));
+		values.putAll(JsonUtils.convertValue(po2, Map.class));
+		values.putAll(JsonUtils.convertValue(po3, Map.class));
 
 		RMap<String, Object> orders = redissonClient.getMap("orders");
 		orders.putAll(values);
@@ -242,13 +252,55 @@ public class RMapTest extends BaseTest {
 		po3.setConsigneeAddress("深圳市福田区竹子林");
 		po3.setOrderAmount(13.51F);
 
-		RMap<String, Object> map1 = redissonClient.getMap("CO201707101842001");
-		map1.putAll(po1.getValues());
-		map1.expire(120, TimeUnit.SECONDS);
-		RMap<String, Object> map2 = redissonClient.getMap("CO201707101846001");
-		map2.putAll(po2.getValues());
-		RMap<String, Object> map3 = redissonClient.getMap("CO201707101846002");
-		map3.putAll(po3.getValues());
+//		RMap<String, Object> map1 = redissonClient.getMap("CO201707101842001");
+//		map1.putAll(po1.getValues());
+//		map1.expire(120, TimeUnit.SECONDS);
+//		RMap<String, Object> map2 = redissonClient.getMap("CO201707101846001");
+//		map2.putAll(po2.getValues());
+//		RMap<String, Object> map3 = redissonClient.getMap("CO201707101846002");
+//		map3.putAll(po3.getValues());
+		//参考testRMapput122Fix()测试案例
+	}
+
+	@Test
+	public void testRMapput122Fix() throws Exception {
+		OrderPO po1 = new OrderPO();
+		po1.setOrderNo("CO201707101842001");
+		po1.setPlatform("ALI");
+		po1.setPhone("18566696280");
+		po1.setConsignee("梁先富");
+		po1.setConsigneeAddress("深圳市龙岗区坂田街道新天下工业区西门");
+		po1.setOrderAmount(3.21F);
+
+		OrderPO po2 = new OrderPO();
+		po2.setOrderNo("CO201707101846001");
+		po2.setPlatform("WISH");
+		po2.setPhone("15989419275");
+		po2.setConsignee("梁新叶");
+		po2.setConsigneeAddress("深圳市龙岗区坂田街道同兴路");
+		po2.setOrderAmount(8.91F);
+
+		OrderPO po3 = new OrderPO();
+		po3.setOrderNo("CO201707101846002");
+		po3.setPlatform("EBY");
+		po3.setPhone("13173515369");
+		po3.setConsignee("琴弦子");
+		po3.setConsigneeAddress("深圳市福田区竹子林");
+		po3.setOrderAmount(13.51F);
+
+//		po1.setChild(po2);
+		RMap<String, Object> map1 = redissonClient.getMap(po1.getOrderNo());
+		Map m1 = JsonUtils.convertValue(po1, Map.class);
+		map1.putAll(m1);
+		// map1.expire(120, TimeUnit.SECONDS);
+
+		RMap<String, Object> map2 = redissonClient.getMap(po2.getOrderNo());
+		Map m2 = JsonUtils.convertValue(po2, Map.class);
+		map2.putAll(m2);
+
+		RMap<String, Object> map3 = redissonClient.getMap(po3.getOrderNo());
+		Map m3 = JsonUtils.convertValue(po3, Map.class);
+		map3.putAll(m3);
 	}
 
 	@Test
@@ -263,16 +315,24 @@ public class RMapTest extends BaseTest {
 				System.out.println(entry.getKey() + "\t" + entry.getValue());
 			});
 		});
-//		RMap<String, Object> map1 = redissonClient.getMap("CO201707101846002");
-//		// Set<String> keys = map1.readAllKeySet();
-//		// keys.forEach(key -> {
-//		// Object object = map1.get(key);
-//		// System.out.println(object);
-//		// });
-//		Set<Entry<String, Object>> entrySet = map1.readAllEntrySet();
-//		entrySet.forEach(entry -> {
-//			System.out.println(entry.getKey() + "\t" + entry.getValue());
-//		});
+		// RMap<String, Object> map1 =
+		// redissonClient.getMap("CO201707101846002");
+		// // Set<String> keys = map1.readAllKeySet();
+		// // keys.forEach(key -> {
+		// // Object object = map1.get(key);
+		// // System.out.println(object);
+		// // });
+		// Set<Entry<String, Object>> entrySet = map1.readAllEntrySet();
+		// entrySet.forEach(entry -> {
+		// System.out.println(entry.getKey() + "\t" + entry.getValue());
+		// });
+	}
+	
+	@Test
+	public void testRMapput1222Fix() throws Exception {
+		RMap<Object, Object> map = redissonClient.getMap("CO201707101846002");
+		OrderPO convertValue = JsonUtils.convertValue(map, OrderPO.class);
+		System.out.println(convertValue);
 	}
 
 	/**
